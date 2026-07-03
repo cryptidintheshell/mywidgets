@@ -4,7 +4,7 @@ pohto: build/window.o build/app.o
 build/app.o: headers/app.h src/app.cpp
 	g++ -c src/app.cpp -o build/app.o `wx-config --cxxflags --libs`
 
-build/window.o: headers/window.h src/window.cpp
+build/window.o: headers/window.h src/window.cpp src/window-functions.cpp
 	g++ -c src/window.cpp -o build/window.o `wx-config --cxxflags --libs`
 
 clean:
