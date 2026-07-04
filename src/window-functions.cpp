@@ -67,25 +67,27 @@ void Window::AddImageToGallery(std::string targetPath) {
 	    bmp = new wxStaticBitmap(pnlBmp, wxID_ANY, wxArtProvider::GetBitmap(wxART_HARDDISK, wxART_OTHER, wxSize(100, 100)));
 	}
 
-	bmp->Bind(wxEVT_LEFT_UP, [=](wxMouseEvent &ev){
-		wxSize popupSize = FitWithinBounds(imgSize.GetWidth(), imgSize.GetHeight(), 500, 300);
+	bmp->Bind(wxEVT_LEFT_UP, [=](wxMouseEvent &ev) {
+		pid_t pid = fork();
 
-		wxFrame* frame = new wxFrame(this, wxID_ANY, "test", wxDefaultPosition, wxSize(popupSize.GetWidth(), popupSize.GetHeight()), wxNO_BORDER | wxFRAME_NO_TASKBAR);
-		wxPanel* pnl = new wxPanel(frame, wxID_ANY);
+	    if (pid < 0) {
+	        std::cerr << "Fork failed!" << std::endl;
+	        return;
+	    }
 
-		wxStaticBitmap* bmp2 = new wxStaticBitmap(pnl, wxID_ANY, wxBitmap(img.Scale(popupSize.GetWidth(), popupSize.GetHeight(), wxIMAGE_QUALITY_HIGH)));
+	    if (pid == 0) {
+	        if (setsid() < 0) exit(1);
 
-    	wxBoxSizer* szr1 = new wxBoxSizer(wxHORIZONTAL);
-		szr1->Add(bmp2, 1, wxEXPAND);
-		pnl->SetSizer(szr1);
+	        std::string programPath2 = "pohtoFrame/window";
+	        char* args[] = {
+		        const_cast<char*>(programPath2.c_str()),
+		        const_cast<char*>(targetPath.c_str()),
+		        nullptr
+		    };
 
-		wxBoxSizer* frameSizer = new wxBoxSizer(wxHORIZONTAL);
-		frameSizer->Add(pnl, 1, wxEXPAND);
-		frame->SetSizer(frameSizer);
-
-		frame->Layout();
-		frame->Show(true);
-		// SendToBottom(frame);
+	        execvp(programPath2.c_str(), args);
+	        exit(1); 
+	    }
 	});
 
     szrPnlBmp->Add(bmp, 0);
